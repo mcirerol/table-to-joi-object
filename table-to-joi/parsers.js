@@ -1,6 +1,6 @@
 const dataTypes = {
     varchar: 'string',
-    nvarChar: 'string',
+    nvarchar: 'string',
     text: 'string',
     int: 'number, integer()',
     bigint: 'number, integer()',
@@ -9,12 +9,12 @@ const dataTypes = {
     bit: 'boolean',
     float: 'number',
     numeric: 'number',
-    decimal: 'number',
+    decimal: 'number, precision(2)',
     real: 'number',
     date: 'date',
     datetime: 'date',
     datetime2: 'date',
-    dateTimeOffset: 'date',
+    datetimeoffset: 'date',
     smalldatetime: 'date',
     time: 'date',
     uniqueidentifier: 'string, guid()',
@@ -27,6 +27,7 @@ const dataTypes = {
     char: 'string',
     nchar: 'string',
     ntext: 'string',
+    text: 'string',
     tvp: 'string',
     udt: 'string',
     geography: 'string',
@@ -85,9 +86,23 @@ class VarCharParser extends GenericParser {
     }
 }
 
+class CharParser extends GenericParser {
+    constructor(...args) {
+        super(...args);
+    }
+    getRules() {
+        super.getRules()
+        const lengthValue = this.typeArgs;
+        this.joiRules.push(`length(${lengthValue})`);
+    }
+}
+
 function ParserFactory(name, type, typeArgs, modifiers, update) {
-    if (type.toLowerCase() === 'varchar') {
+    if (type.toLowerCase() === 'varchar' || type.toLowerCase() === 'nvarchar') {
         return new VarCharParser(name, type, typeArgs, modifiers, update);
+    }
+    if (type.toLowerCase() === 'char' || type.toLowerCase() === 'nchar') {
+        return new CharParser(name, type, typeArgs, modifiers, update);
     }
     return new GenericParser(name, type, typeArgs, modifiers, update);
 }

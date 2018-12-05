@@ -23,6 +23,9 @@ function getMatchRules(joiDefinition, bsaRule) {
       if (common.includes(ruleName)) {
         return true;
       }
+      if(joiDefinition.joiRules.includes(rule)){
+        return true;
+      }
       return false;
     });
     return allCommon && allRequiredPresent;
