@@ -1,0 +1,32 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  padding-left: 2em;
+}
+
+#form {
+  width: 50%;
+  float: left;
+}
+
+#divResult {
+  width: 50%;
+  float: left;
+}
+
+#tableDeclaration {
+  width: 70%;
+}
+
+#result {
+  width: 70%;
+}
+
+#processButton {
+  margin-left: 1em;
+  font-size: 200%;
+
+}
+

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="bundle.js"></script>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+
+
+<body>
+
+  <h1>Table SQL Definition to Joi Object</h1>
+  <br>
+  <label for="optionObject">Schema for:  </label>
+  <select name="optionObject" id="optionObject">
+    <option value="both" selected>both</option>
+    <option value="update">update</option>
+    <option value="insert">insert</option>
+  </select>
+  <input type="button" value="Process!" id="processButton" onclick="process()">
+  <div>
+    <form id="form" action="">
+
+      <div>
+        <h3>Sql Table Definition</h3>
+        <textarea name="tableDeclaration" id="tableDeclaration" rows="40"></textarea>
+        <br>
+      </div>
+
+    </form>
+    <div id="divResult">
+      <h3>Joi Result</h3>
+      <textarea name="result" id="result" rows="40"></textarea>
+    </div>
+  </div>
+
+
+</body>
+
+</html>
