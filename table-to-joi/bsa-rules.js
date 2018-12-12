@@ -129,11 +129,6 @@ const bsaRules =
     zipCode4: Joi.string().regex(/^[0-9]{4}$/),
   
     //
-    // Validate specific zipcode length: 4 allows null/empty string
-    //
-    zipCode4AllowEmpty: Joi.string().regex(/^[0-9]{4}$/).allow(null, ''),
-  
-    //
     // Validate specific zipcode length: 4 required
     //
     zipCode4Required: Joi.string().regex(/^[0-9]{4}$/).required(),

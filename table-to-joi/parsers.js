@@ -62,11 +62,11 @@ class GenericParser {
 
     getRules() {
         if (this.update) {
-            if (!this.modifiers.match(/NOT\s+NULL/)) {
+            if (!this.modifiers.match(/NOT\s+NULL/i)) {
                 this.joiRules.push('allow(null)');
             }
         } else {
-            if (this.modifiers.match(/NOT\s+NULL/)) {
+            if (this.modifiers.match(/NOT\s+NULL/i)) {
                 this.joiRules.push('required()');
             }
         }
@@ -130,6 +130,9 @@ function getJoiRulesFromColumnDefinition(update, columnDefinition) {
     }
     const [, name, type, , typeArgs, modifiers] = result;
     if (dataTypes[type.toLowerCase()] == null) {
+        return null;
+    }
+    if(/identity/i.test(modifiers)){
         return null;
     }
     const joiParser = ParserFactory(name, type, typeArgs, modifiers, update);

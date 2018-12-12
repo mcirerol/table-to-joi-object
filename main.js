@@ -14,8 +14,18 @@ function process() {
 
 }
 
+function test(){
+  const tableDeclaration = `
+  CREATE TABLE AKELA_OLR.dbo.Applicant (
+    EmailAddress varchar(255)
+  ) go
+  `;
+  const result = tableToJoi('both', tableDeclaration);
+  console.log(result);
+}
 
 
+// test();
 document.addEventListener("DOMContentLoaded", function (event) {
   document.getElementById('processButton').onclick = process;
   document.getElementById('form').onsubmit = process;

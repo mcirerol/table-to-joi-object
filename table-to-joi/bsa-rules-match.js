@@ -4,7 +4,7 @@ const requiredJoiRules = {
   'guid()': true,
 }
 
-const specificRulesByColumnNamesMatches = [/zip(code)?5/ig, /zip(code)?4/ig, /email/ig, /phoneAreacode/ig, /phonePrefix/ig, /phoneLineNumber/ig, /phoneExtension/ig];
+const specificRulesByColumnNamesMatches = [/zip(code)?5/i, /zip(code)?4/i, /email/i, /phoneAreacode/i, /phonePrefix/i, /phoneLineNumber/i, /phoneExtension/i];
 
 function columnNameMatchesSpecificRule(columnName) {
   return specificRulesByColumnNamesMatches.find(regexRule => regexRule.test(columnName));
@@ -14,21 +14,23 @@ function getBsaRulesByRegex(regex, bsaRules) {
   return bsaRules.filter(rule => regex.test(rule.property))
 }
 
-function getMatchesFilterByRequired(bsaRules, joiDefinition) {
-  return bsaRules.map((bsaRule) => {
-    const match = {};
-    match.matchedRules = joiDefinition.joiRules;
-    if (joiDefinition.joiRules.includes('required()')) {
-      if (!bsaRule.rules.includes('required()')) {
-        match.matchedRules = match.matchedRules.slice(0);
-        match.matchedRules.splice(match.matchedRules.indexOf('required()'), 1);
-      }
-    }else{
-      
+function isValidRule(bsaRule, joiDefinition, allowedRulesToHaveExtra) {
+  const requiredToMatch = joiDefinition.joiRules.filter(rule => requiredJoiRules[rule]);
+  const allRequiredPresent = requiredToMatch.every(ruleRequired => bsaRule.rules.includes(ruleRequired));
+  const allCommon = bsaRule.rules.every(rule => {
+    if (requiredToMatch.includes(rule)) {
+      return true;
     }
-    match.bsaRule = bsaRule;
-    return match;
-  })
+    const [, ruleName] = /^([^]+)\(.*$/.exec(rule);
+    if (allowedRulesToHaveExtra.includes(ruleName)) {
+      return true;
+    }
+    if (joiDefinition.joiRules.includes(rule)) {
+      return true;
+    }
+    return false;
+  });
+  return allCommon && allRequiredPresent;
 }
 
 function getMatchRules(joiDefinition, bsaRule) {
@@ -60,7 +62,8 @@ function rulesMatch(bsaRule, joiDefinition) {
 
 function match(joiDefinition, bsaRule) {
   console.log(bsaRule.base, ' versus ', joiDefinition.joiBase);
-  if (bsaRule.base === joiDefinition.joiBase && rulesMatch(bsaRule, joiDefinition)) {
+  const allowedRulesToHaveExtra = ['valid', 'invalid', 'allow', 'disallow', 'min', 'max', 'format', 'raw'];
+  if (bsaRule.base === joiDefinition.joiBase && isValidRule(bsaRule, joiDefinition, allowedRulesToHaveExtra)) {
     const match = {};
     match.matchedRules = getMatchRules(joiDefinition, bsaRule);
     match.bsaRule = bsaRule;
@@ -88,7 +91,24 @@ function getMatchesByName(joiDefinition, bsaRules) {
   const regexFound = columnNameMatchesSpecificRule(joiDefinition.name)
   if (regexFound != null) {
     const matchedRules = getBsaRulesByRegex(regexFound, bsaRules);
-    return getMatchesFilterByRequired(matchedRules, joiDefinition)
+    const allowedRulesToHaveExtra = ['valid', 'invalid', 'allow', 'disallow', 'min', 'max', 'format', 'raw', 'regex', 'length', 'options', 'email'];
+    return matchedRules.filter((matchedRule) => isValidRule(matchedRule, joiDefinition, allowedRulesToHaveExtra)).map((bsaRule)=>{
+      const match = {};
+      match.matchedRules = joiDefinition.joiRules.slice(0);
+      const includesRequired = bsaRule.rules.includes('required()');
+      const includesAllowNull = bsaRule.rules.includes('allow(null)');
+      match.matchedRules = match.matchedRules.filter((rule) =>{
+        if(!includesRequired && rule === 'required()'){
+          return false;
+        }
+        if(!includesAllowNull && rule === 'allow(null)'){
+          return false;
+        }
+        return true;
+      })
+      match.bsaRule = bsaRule;
+      return match;
+    })
   }
 }
 
